@@ -2,6 +2,7 @@ build/
 dist/
 out/
 .cache/
+.xmake/
 compile_commands.json
 
 vendor/
