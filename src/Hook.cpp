@@ -32,16 +32,29 @@ namespace SkillXPNotify
                    RE::ActorValue a_skill,
                    float a_delta)
         {
+            // Diagnostic line on EVERY entry before we do anything. Tells
+            // us whether the hook is firing at all, before _original or any
+            // null-checks could silently drop the call.
+            SKSE::log::info(
+                "thunk-enter av={} delta={:+.4f} player=0x{:x}",
+                static_cast<int>(a_skill),
+                a_delta,
+                reinterpret_cast<std::uintptr_t>(a_player));
+
             // Run the engine implementation first via the saved-prologue stub
             // so post-state reflects the gain and any rate multipliers from
             // coexisting plugins (Skill Uncapper et al.) have been applied.
             _original(a_player, a_skill, a_delta);
 
+            SKSE::log::info("thunk-after-original");
+
             if (!a_player || !IsPlayerSkill(a_skill)) {
+                SKSE::log::info("thunk-skip: not-player-skill");
                 return;
             }
             auto* skills = a_player->skills;
             if (!skills || !skills->data) {
+                SKSE::log::info("thunk-skip: skills/data null");
                 return;
             }
 
