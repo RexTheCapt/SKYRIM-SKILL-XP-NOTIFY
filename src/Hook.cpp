@@ -52,7 +52,13 @@ namespace SkillXPNotify
                 SKSE::log::info("thunk-skip: not-player-skill");
                 return;
             }
-            auto* skills = a_player->skills;
+            // In multi-runtime SE+AE builds (HAS_SKYRIM_MULTI_TARGETING) the
+            // PlayerCharacter::skills field is inside INFO_RUNTIME_DATA, not
+            // a direct member — the lib provides GetInfoRuntimeData() to do
+            // the right offset lookup at runtime. r7 saw a_player->skills
+            // always read as null because that compiled to the wrong offset.
+            auto& info = a_player->GetInfoRuntimeData();
+            auto* skills = info.skills;
             if (!skills || !skills->data) {
                 SKSE::log::info("thunk-skip: skills/data null");
                 return;
