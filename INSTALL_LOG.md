@@ -71,6 +71,19 @@ Microsoft Windows SDK and MSVC CRT headers + import libraries, fetched + splatte
 
   (Removed alongside the rest of the toolchain dir in the final cleanup step.)
 
+## 2026-04-29 — xmake 3.0.8
+
+
+- **Source:** GitHub release tarball — `https://github.com/xmake-io/xmake/releases/download/v3.0.8/xmake-bundle-v3.0.8.linux.x86_64`
+- **Install location:** `/home/user/storage/apps/skill-xp-notify-toolchain/xmake/bin/xmake` (single self-contained binary, ~2.6 MB).
+- **Reverse:**
+
+  ```
+  rm -rf /home/user/storage/apps/skill-xp-notify-toolchain/xmake
+  ```
+
+  (Removed alongside the rest of the toolchain dir in the final cleanup step.)
+
 ## 2026-04-29 — toolchain verification artifact
 
 Tiny hello-world Windows DLL produced as a smoke test of the cross-compile pipeline. Not part of the plugin itself; safe to delete at any time.
@@ -86,7 +99,7 @@ Tiny hello-world Windows DLL produced as a smoke test of the cross-compile pipel
 | Where | Size | Reversible by |
 |---|---|---|
 | apt packages (system) | ~1.3 GB | `sudo apt remove --purge ...` (see top of file) |
-| `/home/user/storage/apps/skill-xp-notify-toolchain/` | ~638 MB | `rm -rf` of that directory |
+| `/home/user/storage/apps/skill-xp-notify-toolchain/` | ~640 MB (xwin binary 7.5 MB + xwin-sdk 630 MB + xmake 2.6 MB + test/) | `rm -rf` of that directory |
 | **Total** | **~1.94 GB** | within the approved 2 GB budget |
 
 ---
