@@ -83,6 +83,18 @@ set(CMAKE_EXE_LINKER_FLAGS_INIT    "${_xwin_link_flags_str}")
 set(CMAKE_SHARED_LINKER_FLAGS_INIT "${_xwin_link_flags_str}")
 set(CMAKE_MODULE_LINKER_FLAGS_INIT "${_xwin_link_flags_str}")
 
+# Force the static MSVC runtime (/MT) for everything the chainload sees,
+# including vcpkg port builds. The Wine prefix doesn't ship the Universal
+# CRT forwarder DLLs (`api-ms-win-crt-runtime-l1-1-0.dll` et al.), so a
+# /MD-linked plugin gets bounced by LoadLibrary before SKSE can even
+# call SKSEPlugin_Load. Setting `VCPKG_CRT_LINKAGE = static` on the
+# triplet alone wasn't enough — vcpkg's CRT propagation lands after the
+# chainload toolchain runs, so without this line port builds revert to
+# the CMake default (`MultiThreadedDLL`) and a /MT plugin can't link
+# against /MD ports.
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+    CACHE STRING "" FORCE)
+
 # When CMake probes the compiler it tries to build an executable, which
 # requires the runtime libs to be set up correctly. Building a static lib
 # during the probe is sufficient and avoids ordering issues.

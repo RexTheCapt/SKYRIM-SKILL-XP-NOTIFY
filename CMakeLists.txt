@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.21)
 
+# Match the static CRT linkage we set in the vcpkg triplet so our DLL is
+# self-contained — no MSVCP140/VCRUNTIME140/UCRT-forwarder DLL imports.
+# See the triplet for why this is needed for Linux→Wine specifically.
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+    CACHE STRING "" FORCE)
+
 project(SkillXPNotify
     VERSION     0.1.0
     DESCRIPTION "Per-action skill XP corner notifications for Skyrim SE/AE."

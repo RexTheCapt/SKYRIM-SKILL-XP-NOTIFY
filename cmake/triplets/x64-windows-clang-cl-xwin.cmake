@@ -6,7 +6,14 @@
 #        -DVCPKG_OVERLAY_TRIPLETS=cmake/triplets
 
 set(VCPKG_TARGET_ARCHITECTURE x64)
-set(VCPKG_CRT_LINKAGE         dynamic)
+# Static CRT linkage: the DLL ends up self-contained, no runtime dependency
+# on MSVCP140.dll / VCRUNTIME140.dll / api-ms-win-crt-*.dll. Required for
+# this Linux→Wine build because the Wine prefix has the VC++ libs but not
+# the Universal CRT forwarder DLLs (`api-ms-win-crt-runtime-l1-1-0.dll`
+# et al.), so a /MD-linked plugin gets rejected by LoadLibrary before
+# SKSE can call SKSEPlugin_Load. /MT also matches what most shipped SKSE
+# plugins do for end-user portability.
+set(VCPKG_CRT_LINKAGE         static)
 set(VCPKG_LIBRARY_LINKAGE     static)
 set(VCPKG_CMAKE_SYSTEM_NAME   Windows)
 
