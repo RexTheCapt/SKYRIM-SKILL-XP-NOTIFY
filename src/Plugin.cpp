@@ -1,5 +1,7 @@
 #include "pch.h"
 
+#include "Hook.h"
+
 #include <spdlog/sinks/basic_file_sink.h>
 
 namespace
@@ -27,6 +29,8 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
     SKSE::Init(a_skse);
     InitLogging();
 
-    SKSE::log::info("SkillXPNotify loaded — milestone 3 skeleton, no hooks installed yet.");
+    SKSE::log::info("SkillXPNotify loaded — milestone 5: installing hook.");
+    SkillXPNotify::Hook::Install();
+    SKSE::log::info("Hook install path complete; expect skill-xp lines on player XP gains.");
     return true;
 }

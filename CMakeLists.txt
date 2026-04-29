@@ -52,7 +52,8 @@ add_commonlibsse_plugin(SkillXPNotify
     VERSION ${PROJECT_VERSION}
     USE_ADDRESS_LIBRARY
     SOURCES
-        src/Plugin.cpp)
+        src/Plugin.cpp
+        src/Hook.cpp)
 
 target_include_directories(SkillXPNotify PRIVATE src)
 target_precompile_headers(SkillXPNotify PRIVATE src/pch.h)
