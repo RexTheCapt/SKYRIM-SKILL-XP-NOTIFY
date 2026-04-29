@@ -1,5 +1,7 @@
 #include "pch.h"
 
+#include <spdlog/sinks/basic_file_sink.h>
+
 namespace
 {
     void InitLogging()

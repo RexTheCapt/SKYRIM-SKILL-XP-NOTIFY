@@ -84,6 +84,35 @@ Microsoft Windows SDK and MSVC CRT headers + import libraries, fetched + splatte
 
   (Removed alongside the rest of the toolchain dir in the final cleanup step.)
 
+## 2026-04-29 — vcpkg (manifest mode)
+
+Used by the CMake build (after the M3 pivot away from xmake) to fetch and build the plugin's transitive deps under our `clang-cl-xwin` cross-compile toolchain.
+
+- **Source:** `git clone --depth 1 https://github.com/microsoft/vcpkg.git` then `./bootstrap-vcpkg.sh -disableMetrics`.
+- **Install location:** `/home/user/storage/apps/skill-xp-notify-toolchain/vcpkg/`. The bootstrap also downloads vcpkg's own pinned cmake (4.2.3) and ninja into `vcpkg/downloads/tools/`.
+- **Approx size:** ~90 MB after bootstrap; grows to ~200–400 MB once ports (`spdlog`, `directxmath`, transitively `fmt`) build into `vcpkg/buildtrees/` and `vcpkg/installed/`.
+- **Reverse:**
+
+  ```
+  rm -rf /home/user/storage/apps/skill-xp-notify-toolchain/vcpkg
+  ```
+
+  (Removed alongside the rest of the toolchain dir in the final cleanup step.)
+
+## 2026-04-29 — Pascal-case symlinks under xwin-sdk/sdk/lib/um/x86_64/
+
+CommonLibVR's `CMakeLists.txt` links libraries with mixed-case names (`Advapi32.lib`, `Dbghelp.lib`, `D3D11.lib`, `Ole32.lib`, `Version.lib`, etc.) but xwin's splatted SDK ships only `ALLCAPS.lib` / `lowercase.lib` / one mixed form per library — none of which match those Pascal-case forms. Linux is case-sensitive, so the link fails. We add a small set of symlinks pointing at the lowercase originals.
+
+- **Files added:** `Advapi32.lib`, `Dbghelp.lib`, `Ole32.lib`, `Version.lib`, `D3D11.lib`, `D3dcompiler.lib`, `Dxgi.lib` under `/home/user/storage/apps/skill-xp-notify-toolchain/xwin-sdk/sdk/lib/um/x86_64/`. Each is a symlink to its lowercase sibling (a few KB total).
+- **Reverse:** they live inside the xwin-sdk directory which is already covered by the xwin-sdk uninstall entry above; the parent `rm -rf` of `xwin-sdk/` removes them. To remove just the symlinks while keeping xwin-sdk:
+
+  ```
+  cd /home/user/storage/apps/skill-xp-notify-toolchain/xwin-sdk/sdk/lib/um/x86_64/
+  for n in Advapi32 Dbghelp Ole32 Version D3D11 D3dcompiler Dxgi; do
+      [ -L "$n.lib" ] && rm "$n.lib"
+  done
+  ```
+
 ## 2026-04-29 — toolchain verification artifact
 
 Tiny hello-world Windows DLL produced as a smoke test of the cross-compile pipeline. Not part of the plugin itself; safe to delete at any time.
@@ -99,8 +128,8 @@ Tiny hello-world Windows DLL produced as a smoke test of the cross-compile pipel
 | Where | Size | Reversible by |
 |---|---|---|
 | apt packages (system) | ~1.3 GB | `sudo apt remove --purge ...` (see top of file) |
-| `/home/user/storage/apps/skill-xp-notify-toolchain/` | ~640 MB (xwin binary 7.5 MB + xwin-sdk 630 MB + xmake 2.6 MB + test/) | `rm -rf` of that directory |
-| **Total** | **~1.94 GB** | within the approved 2 GB budget |
+| `/home/user/storage/apps/skill-xp-notify-toolchain/` | ~750 MB–1 GB (xwin binary 7.5 MB + xwin-sdk 630 MB + xmake 2.6 MB + test/ + vcpkg ~90 MB bootstrap, grows with port cache) | `rm -rf` of that directory |
+| **Total** | **~2.0–2.3 GB** | over the original 2 GB approved budget once vcpkg ports are cached; stays under if `vcpkg/buildtrees/` and `vcpkg/downloads/` are pruned periodically. |
 
 ---
 

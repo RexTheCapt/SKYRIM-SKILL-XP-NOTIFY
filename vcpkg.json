@@ -1,0 +1,12 @@
+{
+    "name": "skill-xp-notify",
+    "version-string": "0.1.0",
+    "description": "Per-action skill XP corner notifications for Skyrim SE/AE.",
+    "dependencies": [
+        {
+            "name": "spdlog",
+            "features": ["wchar"]
+        },
+        "directxmath"
+    ]
+}
