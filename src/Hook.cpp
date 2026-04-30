@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "Hook.h"
+#include "Notify.h"
 
 #include <cstring>
 
@@ -66,6 +67,9 @@ namespace SkillXPNotify
 
             const auto  idx = SkillIndex(a_skill);
             const auto& sd  = skills->data->skills[idx];
+            const float pct = sd.levelThreshold > 0.0f
+                                  ? (sd.xp / sd.levelThreshold) * 100.0f
+                                  : 0.0f;
 
             SKSE::log::info(
                 "skill-xp av={} idx={} delta={:+.4f} level={:.2f} "
@@ -76,8 +80,14 @@ namespace SkillXPNotify
                 sd.level,
                 sd.xp,
                 sd.levelThreshold,
-                sd.levelThreshold > 0.0f ? (sd.xp / sd.levelThreshold) * 100.0f
-                                         : 0.0f);
+                pct);
+
+            // M6: corner notification on real (non-zero) gains. Skips the
+            // engine's high-volume zero-delta sneak-detection ticks. M7
+            // (throttle) will replace this filter with proper accumulation.
+            if (a_delta > 0.0f) {
+                Notify::Dispatch(a_skill, a_delta, pct);
+            }
         }
 
         // Per the r5 diagnostic, AddSkillExperience starts with:
