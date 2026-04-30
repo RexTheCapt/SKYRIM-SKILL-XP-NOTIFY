@@ -155,6 +155,25 @@ namespace SkillXPNotify::Config
                 return;
             }
 
+            if (section == "reload") {
+                if (key == "keycode" || key == "key") {
+                    // Accept hex (0x..) or decimal.
+                    try {
+                        const std::string v{ a_value };
+                        const int         base =
+                            (v.size() > 2 && v[0] == '0' &&
+                             (v[1] == 'x' || v[1] == 'X'))
+                                ? 16
+                                : 10;
+                        g_settings.reload_key_code.store(
+                            std::stoi(v, nullptr, base));
+                    } catch (...) {
+                    }
+                    return;
+                }
+                return;
+            }
+
             if (section == "skip") {
                 const auto& map = SkillIndexLookup();
                 const auto  it  = map.find(key);
@@ -222,9 +241,10 @@ namespace SkillXPNotify::Config
         }
         SKSE::log::info(
             "Config: loaded SkillXPNotify.ini — throttle_ms={}, "
-            "post_emit_guard_ms={}, skip-indices=[{}].",
+            "post_emit_guard_ms={}, reload_key=0x{:x}, skip-indices=[{}].",
             g_settings.throttle_ms.load(),
             g_settings.post_emit_guard_ms.load(),
+            g_settings.reload_key_code.load(),
             skip_list.empty() ? "(none)" : skip_list.c_str());
     }
 }  // namespace SkillXPNotify::Config

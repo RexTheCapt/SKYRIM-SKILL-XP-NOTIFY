@@ -2,6 +2,7 @@
 
 #include "Config.h"
 #include "Hook.h"
+#include "HotkeyReload.h"
 
 #include <spdlog/sinks/basic_file_sink.h>
 
@@ -25,6 +26,41 @@ namespace
     }
 }
 
+namespace
+{
+    void OnSKSEMessage(SKSE::MessagingInterface::Message* a_msg)
+    {
+        if (!a_msg) {
+            return;
+        }
+        switch (a_msg->type) {
+            case SKSE::MessagingInterface::kInputLoaded:
+                // First moment the input device manager is up; install
+                // the hotkey listener now so subsequent F11 presses
+                // (or whatever the user configured) trigger reloads.
+                SkillXPNotify::HotkeyReload::Install();
+                break;
+
+            case SKSE::MessagingInterface::kPostLoadGame:
+            case SKSE::MessagingInterface::kNewGame:
+                // Natural game-state moments where players reasonably
+                // expect any tweaks they made to take effect — re-read
+                // the .ini from disk so edits between sessions apply
+                // without restarting the game.
+                SkillXPNotify::Config::Load();
+                SKSE::log::info(
+                    "Config reloaded due to {} message.",
+                    a_msg->type == SKSE::MessagingInterface::kNewGame
+                        ? "kNewGame"
+                        : "kPostLoadGame");
+                break;
+
+            default:
+                break;
+        }
+    }
+}
+
 SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
 {
     SKSE::Init(a_skse);
@@ -33,5 +69,14 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
     SKSE::log::info("SkillXPNotify loaded.");
     SkillXPNotify::Config::Load();
     SkillXPNotify::Hook::Install();
+
+    if (auto* msg = SKSE::GetMessagingInterface()) {
+        msg->RegisterListener(OnSKSEMessage);
+    } else {
+        SKSE::log::warn(
+            "SKSE messaging interface unavailable — game-state reloads "
+            "and hotkey will not be wired.");
+    }
+
     return true;
 }

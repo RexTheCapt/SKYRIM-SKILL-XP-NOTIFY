@@ -7,7 +7,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
     CACHE STRING "" FORCE)
 
 project(SkillXPNotify
-    VERSION     1.0.0
+    VERSION     1.1.0
     DESCRIPTION "Per-action skill XP corner notifications for Skyrim SE/AE."
     LANGUAGES   CXX)
 
@@ -56,7 +56,8 @@ add_commonlibsse_plugin(SkillXPNotify
         src/Hook.cpp
         src/Notify.cpp
         src/Throttle.cpp
-        src/Config.cpp)
+        src/Config.cpp
+        src/HotkeyReload.cpp)
 
 target_include_directories(SkillXPNotify PRIVATE src)
 target_precompile_headers(SkillXPNotify PRIVATE src/pch.h)

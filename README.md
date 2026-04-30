@@ -91,6 +91,19 @@ Enchanting  = false
 A working sample lives at `SkillXPNotify.ini.example` in this repo —
 copy it next to the DLL and edit.
 
+### Live config reload
+
+Two ways to apply changes you make to `SkillXPNotify.ini` without
+restarting the game:
+
+- **Save-load triggers a reload.** Whenever you load a save or start a
+  new game, SkillXPNotify re-reads its INI from disk. So edit the file
+  in any text editor, then load any save — your changes take effect.
+- **Hotkey** (default **F11**, configurable). Press it any time during
+  gameplay and a corner notification confirms the reload. Set
+  `[reload].key_code = 0` in the INI to disable, or change to any
+  DirectInput scancode. (F12 is reserved for Steam screenshots — avoid.)
+
 ### What the throttle does
 
 Skyrim's engine fires `AddSkillExperience` very frequently during

@@ -23,6 +23,20 @@ interval_ms = 1500
 ; other.
 post_emit_guard_ms = 500
 
+[reload]
+; DirectInput key code for the "reload this .ini now" hotkey. Press it
+; in-game to apply changes you've made to this file without restarting
+; — a "SkillXPNotify: config reloaded." notification confirms.
+;
+; Default 0x57 (F11). Set to 0 to disable the hotkey. The .ini also
+; reloads automatically on save-load and new-game regardless of this.
+;
+; Common DI codes (decimal or hex both accepted):
+;   F1=0x3B  F2=0x3C  F3=0x3D  F4=0x3E  F5=0x3F  F6=0x40
+;   F7=0x41  F8=0x42  F9=0x43  F10=0x44 F11=0x57 F12=0x58
+;   Insert=0xD2  Home=0xC7  Delete=0xD3  End=0xCF
+key_code = 0x57
+
 [skip]
 ; Set a skill to `true` (or 1, yes, on) to suppress its corner
 ; notifications without disabling logging. Useful if a particular skill
