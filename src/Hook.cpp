@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "Hook.h"
+#include "Config.h"
 #include "Throttle.h"
 
 #include <cstring>
@@ -68,7 +69,14 @@ namespace SkillXPNotify
                 sd.levelThreshold,
                 pct);
 
-            // M7 throttle: per-skill accumulator + 1-second emission.
+            // M8: skip-list — user-configured-out skills get the log
+            // line and computed pct (so logs stay complete) but no
+            // corner notification dispatched.
+            if (Config::Get().skip[idx].load()) {
+                return;
+            }
+
+            // M7 throttle: per-skill accumulator + leading-edge emission.
             Throttle::OnXPGain(a_skill, a_delta, pct);
         }
 

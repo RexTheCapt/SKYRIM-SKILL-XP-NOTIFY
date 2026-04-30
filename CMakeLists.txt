@@ -55,7 +55,8 @@ add_commonlibsse_plugin(SkillXPNotify
         src/Plugin.cpp
         src/Hook.cpp
         src/Notify.cpp
-        src/Throttle.cpp)
+        src/Throttle.cpp
+        src/Config.cpp)
 
 target_include_directories(SkillXPNotify PRIVATE src)
 target_precompile_headers(SkillXPNotify PRIVATE src/pch.h)

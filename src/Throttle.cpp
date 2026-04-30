@@ -2,6 +2,7 @@
 
 #include "Throttle.h"
 
+#include "Config.h"
 #include "Notify.h"
 
 #include <RE/H/HUDMenu.h>
@@ -43,15 +44,20 @@ namespace SkillXPNotify::Throttle
 
         std::mutex g_mtx;
 
-        // Per-skill leading-edge wait. Long enough to feel like an
-        // accumulation, short enough to feel responsive on bursty actions.
-        constexpr auto kMinInterval = std::chrono::milliseconds(1500);
+        // Per-skill leading-edge wait + post-emit dead time. Tunable from
+        // SkillXPNotify.ini (see Config.cpp); defaults match the hard-
+        // coded values that shipped through r13.
+        std::chrono::milliseconds MinInterval()
+        {
+            return std::chrono::milliseconds(
+                Config::Get().throttle_ms.load());
+        }
 
-        // Dead time after each emit before we'll consider emitting again,
-        // even if Skyrim's queue reads empty. Covers the gap between
-        // Notify::Dispatch (which runs on the SKSE TaskInterface) and
-        // the notification actually appearing in HUDNotifications::queue.
-        constexpr auto kPostEmitGuard = std::chrono::milliseconds(500);
+        std::chrono::milliseconds PostEmitGuard()
+        {
+            return std::chrono::milliseconds(
+                Config::Get().post_emit_guard_ms.load());
+        }
 
         // Returns the number of pending notifications in Skyrim's HUD.
         // Safe to call from the AddSkillExperience hook (we're on the
@@ -126,7 +132,7 @@ namespace SkillXPNotify::Throttle
             }
 
             // Still accumulating inside the per-skill window.
-            if (now - s.window_start < kMinInterval) {
+            if (now - s.window_start < MinInterval()) {
                 return;
             }
 
@@ -136,7 +142,7 @@ namespace SkillXPNotify::Throttle
             //       Skyrim has actually drained earlier notifications.
             // Either gate failing leaves the accumulator armed; the
             // next grant retries.
-            if (now - g_last_emit_time < kPostEmitGuard) {
+            if (now - g_last_emit_time < PostEmitGuard()) {
                 return;
             }
             if (LiveQueueSize() > 0) {

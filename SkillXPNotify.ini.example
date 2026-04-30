@@ -1,0 +1,51 @@
+; SkillXPNotify configuration. Drop this file in
+;   <Skyrim>/Data/SKSE/Plugins/SkillXPNotify.ini
+; alongside SkillXPNotify.dll.
+;
+; Comments start with ; or #. Section headers in [brackets].
+; Section + key names are case-insensitive and ignore spaces / hyphens /
+; underscores, so [skip] / [Skip] / [ skip ] are all the same.
+;
+; If this file is missing, SkillXPNotify uses the same defaults that
+; shipped with the plugin (the values shown below).
+
+[throttle]
+; Per-skill leading-edge wait, in milliseconds. After you start using a
+; skill we hold the first notification this long, accumulating XP, then
+; emit one message with the SUM. Smaller = more responsive but more
+; messages; larger = fewer messages with bigger numbers.
+interval_ms = 1500
+
+; Dead time after each emit before another notification can fire, even
+; if Skyrim's queue reads empty. Covers the gap between dispatching a
+; notification and it appearing in HUDNotifications. 500 ms is normally
+; enough; bump it if you ever see two messages flash on top of each
+; other.
+post_emit_guard_ms = 500
+
+[skip]
+; Set a skill to `true` (or 1, yes, on) to suppress its corner
+; notifications without disabling logging. Useful if a particular skill
+; spams during normal play and you'd rather watch it via the log file.
+;
+; Skill names are case-insensitive and ignore spaces / hyphens /
+; underscores. Aliases recognised: archery=marksman, speech=speechcraft.
+
+OneHanded   = false
+TwoHanded   = false
+Archery     = false
+Block       = false
+Smithing    = false
+HeavyArmor  = false
+LightArmor  = false
+Pickpocket  = false
+Lockpicking = false
+Sneak       = false
+Alchemy     = false
+Speech      = false
+Alteration  = false
+Conjuration = false
+Destruction = false
+Illusion    = false
+Restoration = false
+Enchanting  = false
