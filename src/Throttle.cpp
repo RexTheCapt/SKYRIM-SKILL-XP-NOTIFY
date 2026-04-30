@@ -4,6 +4,10 @@
 
 #include "Notify.h"
 
+#include <RE/H/HUDMenu.h>
+#include <RE/H/HUDNotifications.h>
+#include <RE/U/UI.h>
+
 #include <array>
 #include <chrono>
 #include <mutex>
@@ -31,11 +35,11 @@ namespace SkillXPNotify::Throttle
 
         std::array<PerSkill, 18> g_state{};
 
-        // Global serialiser: a model of when Skyrim's HUDNotifications
-        // queue is expected to be empty. Each emit pushes this forward by
-        // kDisplayTime; emits before this time are deferred so we don't
-        // stack messages on top of each other in-game.
-        time_point g_queue_clear_time = {};
+        // Last time we Notify::Dispatch'd. Even if Skyrim's queue reads
+        // empty, it can take a frame or two for the notification to
+        // materialise — kPostEmitGuard prevents us from emitting again
+        // before the previous one shows up in the queue.
+        time_point g_last_emit_time = {};
 
         std::mutex g_mtx;
 
@@ -43,10 +47,47 @@ namespace SkillXPNotify::Throttle
         // accumulation, short enough to feel responsive on bursty actions.
         constexpr auto kMinInterval = std::chrono::milliseconds(1500);
 
-        // Conservative model of Skyrim's per-notification display time
-        // (default fNotificationDisplayTime ≈ 3 s, plus a buffer so we
-        // don't race the drain). M8 (INI) will expose this knob.
-        constexpr auto kDisplayTime = std::chrono::milliseconds(3500);
+        // Dead time after each emit before we'll consider emitting again,
+        // even if Skyrim's queue reads empty. Covers the gap between
+        // Notify::Dispatch (which runs on the SKSE TaskInterface) and
+        // the notification actually appearing in HUDNotifications::queue.
+        constexpr auto kPostEmitGuard = std::chrono::milliseconds(500);
+
+        // Returns the number of pending notifications in Skyrim's HUD.
+        // Safe to call from the AddSkillExperience hook (we're on the
+        // main thread). Returns 0 if the UI singleton or HUDMenu isn't
+        // up yet (happens very early in load).
+        std::size_t LiveQueueSize()
+        {
+            auto* ui = RE::UI::GetSingleton();
+            if (!ui) {
+                return 0;
+            }
+            auto hud = ui->GetMenu<RE::HUDMenu>();
+            if (!hud) {
+                return 0;
+            }
+
+            // RTTI-free type check: a HUDObject's vtable pointer is at
+            // offset 0; HUDNotifications has a unique vtable address
+            // resolved once via REL::VariantID.
+            static const auto kHUDNotifVTable =
+                RE::HUDNotifications::VTABLE[0].address();
+
+            auto& rt = hud->GetRuntimeData();
+            for (auto* obj : rt.objects) {
+                if (!obj) {
+                    continue;
+                }
+                const auto vt =
+                    *reinterpret_cast<const std::uintptr_t*>(obj);
+                if (vt == kHUDNotifVTable) {
+                    auto* notifs = static_cast<RE::HUDNotifications*>(obj);
+                    return notifs->queue.size();
+                }
+            }
+            return 0;
+        }
 
         constexpr int SkillIndex(RE::ActorValue a_av)
         {
@@ -89,10 +130,16 @@ namespace SkillXPNotify::Throttle
                 return;
             }
 
-            // Window elapsed. Defer if Skyrim's queue is still expected
-            // to be displaying earlier notifications — keep accumulating
-            // and the next grant will retry.
-            if (now < g_queue_clear_time) {
+            // Window elapsed. Two gates before emitting:
+            //   (1) post-emit dead time — covers TaskInterface latency.
+            //   (2) live HUDNotifications queue depth — defer until
+            //       Skyrim has actually drained earlier notifications.
+            // Either gate failing leaves the accumulator armed; the
+            // next grant retries.
+            if (now - g_last_emit_time < kPostEmitGuard) {
+                return;
+            }
+            if (LiveQueueSize() > 0) {
                 return;
             }
 
@@ -101,19 +148,8 @@ namespace SkillXPNotify::Throttle
                 emit_pct            = s.latest_pct;
                 s.accumulated_delta = 0.0f;
                 s.window_start      = time_point{};
-
-                // Push the modeled queue-clear forward. If we're already
-                // past the previous clear time the new emit anchors at
-                // `now`; if we somehow got here while still within the
-                // drain window (shouldn't, due to the check above) we
-                // chain from `g_queue_clear_time` instead so the model
-                // stays monotonic.
-                // (Windows.h's `max` macro shadows std::max in this TU,
-                // so write the take-the-later-of-two with a ternary.)
-                const time_point anchor =
-                    (now > g_queue_clear_time) ? now : g_queue_clear_time;
-                g_queue_clear_time = anchor + kDisplayTime;
-                do_emit = true;
+                g_last_emit_time    = now;
+                do_emit             = true;
             }
         }
 
