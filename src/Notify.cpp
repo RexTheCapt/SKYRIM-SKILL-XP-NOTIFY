@@ -2,6 +2,8 @@
 
 #include "Notify.h"
 
+#include <RE/A/ActorValueList.h>
+#include <RE/A/ActorValueInfo.h>
 #include <RE/S/SendHUDMessage.h>
 
 #include <array>
@@ -14,9 +16,14 @@ namespace SkillXPNotify::Notify
 {
     namespace
     {
-        // Indexed by PlayerSkills::Data::Skills::Skill (kOneHanded=0 .. kEnchanting=17).
-        // Display strings — what the user actually sees in the corner.
-        constexpr std::array<std::string_view, 18> kSkillDisplayNames = {
+        // Indexed by PlayerSkills::Data::Skills::Skill (kOneHanded=0..kEnchanting=17).
+        // Used as a fallback when the engine's ActorValueInfo isn't ready
+        // yet (very early in load) or its fullName is empty. Mods that
+        // rename skills (e.g. Adamant Hand-to-Hand renaming Pickpocket
+        // → "Hand to Hand", Lockpicking → "Security") edit the AVIF
+        // record's FULL field, which we read live below; their renames
+        // override these defaults.
+        constexpr std::array<std::string_view, 18> kSkillFallbackNames = {
             "One-Handed",  "Two-Handed", "Archery",     "Block",
             "Smithing",    "Heavy Armor", "Light Armor", "Pickpocket",
             "Lockpicking", "Sneak",       "Alchemy",     "Speech",
@@ -29,12 +36,32 @@ namespace SkillXPNotify::Notify
             return static_cast<int>(a_av) -
                    static_cast<int>(RE::ActorValue::kOneHanded);
         }
+
+        // Look up the player-facing display name for a skill from the
+        // engine's loaded AVIF (ActorValueInformation) records, so any
+        // skill-renaming mod (Adamant, Skill Names Fixed, etc.) takes
+        // effect in our notifications without us having to know about
+        // it. Falls back to our hardcoded vanilla table if the singleton
+        // / record / name is missing — which is harmless and matches
+        // pre-fix behaviour.
+        std::string_view DisplayName(RE::ActorValue a_av, int a_idx)
+        {
+            if (auto* list = RE::ActorValueList::GetSingleton()) {
+                if (auto* info = list->GetActorValueInfo(a_av)) {
+                    if (const auto* fn = info->GetFullName(); fn && *fn) {
+                        return fn;
+                    }
+                }
+            }
+            return kSkillFallbackNames[a_idx];
+        }
     }  // namespace
 
     void Dispatch(RE::ActorValue a_skill, float a_delta, float a_pct)
     {
         const auto idx = SkillIndex(a_skill);
-        if (idx < 0 || idx >= static_cast<int>(kSkillDisplayNames.size())) {
+        if (idx < 0 ||
+            idx >= static_cast<int>(kSkillFallbackNames.size())) {
             return;
         }
 
@@ -42,7 +69,7 @@ namespace SkillXPNotify::Notify
         // We can switch to "→" once the in-game test confirms it renders.
         std::string msg = std::format("+{:.1f} {} -> {:.0f}%",
                                       a_delta,
-                                      kSkillDisplayNames[idx],
+                                      DisplayName(a_skill, idx),
                                       a_pct);
 
         const auto* task = SKSE::GetTaskInterface();
