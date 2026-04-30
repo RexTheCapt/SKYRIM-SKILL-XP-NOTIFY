@@ -1,7 +1,7 @@
 #include "pch.h"
 
 #include "Hook.h"
-#include "Notify.h"
+#include "Throttle.h"
 
 #include <cstring>
 
@@ -33,35 +33,21 @@ namespace SkillXPNotify
                    RE::ActorValue a_skill,
                    float a_delta)
         {
-            // Diagnostic line on EVERY entry before we do anything. Tells
-            // us whether the hook is firing at all, before _original or any
-            // null-checks could silently drop the call.
-            SKSE::log::info(
-                "thunk-enter av={} delta={:+.4f} player=0x{:x}",
-                static_cast<int>(a_skill),
-                a_delta,
-                reinterpret_cast<std::uintptr_t>(a_player));
-
-            // Run the engine implementation first via the saved-prologue stub
-            // so post-state reflects the gain and any rate multipliers from
-            // coexisting plugins (Skill Uncapper et al.) have been applied.
+            // Engine first, so post-state reflects this gain (and any rate
+            // multipliers from coexisting plugins like Skill Uncapper).
             _original(a_player, a_skill, a_delta);
 
-            SKSE::log::info("thunk-after-original");
-
-            if (!a_player || !IsPlayerSkill(a_skill)) {
-                SKSE::log::info("thunk-skip: not-player-skill");
+            // Skip the engine's high-volume zero-delta sneak-detection
+            // ticks. Real grants are positive.
+            if (a_delta <= 0.0f || !a_player || !IsPlayerSkill(a_skill)) {
                 return;
             }
-            // In multi-runtime SE+AE builds (HAS_SKYRIM_MULTI_TARGETING) the
-            // PlayerCharacter::skills field is inside INFO_RUNTIME_DATA, not
-            // a direct member — the lib provides GetInfoRuntimeData() to do
-            // the right offset lookup at runtime. r7 saw a_player->skills
-            // always read as null because that compiled to the wrong offset.
-            auto& info = a_player->GetInfoRuntimeData();
+            // In multi-runtime SE+AE builds the PlayerCharacter::skills
+            // field lives in INFO_RUNTIME_DATA and must be reached via the
+            // version-conditional accessor.
+            auto& info   = a_player->GetInfoRuntimeData();
             auto* skills = info.skills;
             if (!skills || !skills->data) {
-                SKSE::log::info("thunk-skip: skills/data null");
                 return;
             }
 
@@ -82,12 +68,8 @@ namespace SkillXPNotify
                 sd.levelThreshold,
                 pct);
 
-            // M6: corner notification on real (non-zero) gains. Skips the
-            // engine's high-volume zero-delta sneak-detection ticks. M7
-            // (throttle) will replace this filter with proper accumulation.
-            if (a_delta > 0.0f) {
-                Notify::Dispatch(a_skill, a_delta, pct);
-            }
+            // M7 throttle: per-skill accumulator + 1-second emission.
+            Throttle::OnXPGain(a_skill, a_delta, pct);
         }
 
         // Per the r5 diagnostic, AddSkillExperience starts with:
@@ -139,8 +121,6 @@ namespace SkillXPNotify
             patch[0]               = 0xE9;
             const std::int32_t d32 = static_cast<std::int32_t>(disp);
             std::memcpy(patch + 1, &d32, sizeof(d32));
-            // Fill any leftover bytes (here: kPrologueSize - kRel32JmpSize = 2)
-            // with single-byte NOPs.
             for (std::size_t i = kRel32JmpSize; i < a_total_size; ++i) {
                 patch[i] = 0x90;
             }
@@ -165,16 +145,6 @@ namespace SkillXPNotify
                 kGatewaySize);
             return;
         }
-
-        // Layout in the gateway:
-        //   [0 .. 7)         saved 7 bytes of original prologue   ──╮ _original
-        //   [7 .. 21)        FF 25 + abs64(func+7)                ──╯ starts
-        //                    (jump-back trampoline that resumes
-        //                     execution at the comiss xmm2,xmm0
-        //                     instruction)
-        //   [21 .. 35)       FF 25 + abs64(&Thunk)
-        //                    (entry redirector — what the patched
-        //                     function entry rel32-jumps to)
 
         std::memcpy(gateway,
                     reinterpret_cast<const void*>(src_addr),
