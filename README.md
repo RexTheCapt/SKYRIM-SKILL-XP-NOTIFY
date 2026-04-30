@@ -1,5 +1,7 @@
 # SkillXPNotify
 
+![Sneak +3.6 -> 82% notification in the top-left corner](docs/screenshots/sneak-82-percent.jpg)
+
 SKSE plugin for Skyrim Special Edition / Anniversary Edition that surfaces
 **per-action skill XP gains** in the corner notification area, so progress
 in the "hidden" skills (Sneak, Lockpicking, Pickpocket, Illusion-during-
