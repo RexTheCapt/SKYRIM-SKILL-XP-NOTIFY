@@ -7,7 +7,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
     CACHE STRING "" FORCE)
 
 project(SkillXPNotify
-    VERSION     0.1.0
+    VERSION     1.0.0
     DESCRIPTION "Per-action skill XP corner notifications for Skyrim SE/AE."
     LANGUAGES   CXX)
 
