@@ -144,6 +144,10 @@ Format:
 `PlayerSkills::Data::skills` array index. Useful for tuning the
 throttle or debugging unexpected skill grants.
 
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for the per-version release notes.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

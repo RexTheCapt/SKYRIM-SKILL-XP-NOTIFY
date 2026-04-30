@@ -38,6 +38,7 @@ mkdir -p "$STAGE/Data/SKSE/Plugins"
 cp "$DLL_PATH"                 "$STAGE/Data/SKSE/Plugins/SkillXPNotify.dll"
 cp "SkillXPNotify.ini.example" "$STAGE/Data/SKSE/Plugins/SkillXPNotify.ini.example"
 cp README.md                   "$STAGE/README.md"
+cp CHANGELOG.md                "$STAGE/CHANGELOG.md"
 cp LICENSE                     "$STAGE/LICENSE"
 
 (cd "$STAGE" && zip -qr "../$(basename "$OUT_ZIP")" .)
