@@ -25,7 +25,13 @@ namespace SkillXPNotify::Throttle
         std::array<PerSkill, 18> g_state{};
         std::mutex               g_mtx;
 
-        constexpr auto kMinInterval = std::chrono::seconds(1);
+        // Skyrim's corner notifications display for roughly 1.5–3 s each
+        // (controlled by fNotificationDisplayTime). At 1 s/skill we emit
+        // faster than the queue drains, so a long activity leaves a
+        // visible tail of notifications playing after the player stops.
+        // 2 s lines up emit rate with drain rate without feeling sluggish
+        // on short bursts. M8 (INI) will make this user-tunable.
+        constexpr auto kMinInterval = std::chrono::milliseconds(2000);
 
         constexpr int SkillIndex(RE::ActorValue a_av)
         {

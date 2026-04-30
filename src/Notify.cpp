@@ -56,10 +56,15 @@ namespace SkillXPNotify::Notify
         }
 
         task->AddTask([m = std::move(msg)]() {
+            // cancelIfAlreadyQueued = true: if Skyrim's queue still has a
+            // notification with this exact text (rare with our format —
+            // mostly happens when consecutive accumulated deltas round to
+            // identical pct), skip the duplicate. Cheap dedup, no harm
+            // when text varies.
             RE::SendHUDMessage::ShowHUDMessage(
                 m.c_str(),
                 /*soundToPlay=*/nullptr,
-                /*cancelIfAlreadyQueued=*/false);
+                /*cancelIfAlreadyQueued=*/true);
         });
     }
 }  // namespace SkillXPNotify::Notify
