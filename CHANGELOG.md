@@ -4,6 +4,27 @@ All notable changes to SkillXPNotify, in reverse chronological order.
 Versions follow [SemVer](https://semver.org/): `MAJOR.MINOR.PATCH`. Each
 release is also a git tag (e.g. `v1.1.0`) on the public repo.
 
+## [1.1.1] — 2026-05-01
+
+### Added
+
+- **Custom Skills Framework safe-detection scaffolding.** The plugin
+  now listens for the SKSE messaging dispatch from
+  [Custom Skills Framework (Exit-9B/CustomSkills)](https://github.com/Exit-9B/CustomSkills)
+  during plugin load. If CSF is loaded in the same process, the plugin
+  captures the integration proxy and logs the detected interface
+  version — actual per-XP integration is gated on an upstream event
+  that fires on every `Skill::Advance()` call (the existing
+  `SkillIncreaseEvent` fires on rank-up only and would duplicate
+  CSF's own notification). If CSF isn't loaded, no code path touches
+  it; behaviour is identical to v1.1.0. No new runtime dependency,
+  no static link to CSF, no header vendoring.
+
+### Compatibility
+
+- Same as v1.1.0. Adds optional CSF awareness when present; remains
+  fully functional and crash-free without CSF.
+
 ## [1.1.0] — 2026-04-30
 
 ### Added

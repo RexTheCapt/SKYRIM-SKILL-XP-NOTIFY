@@ -1,5 +1,6 @@
 #include "pch.h"
 
+#include "CSFIntegration.h"
 #include "Config.h"
 #include "Hook.h"
 #include "HotkeyReload.h"
@@ -69,6 +70,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
     SKSE::log::info("SkillXPNotify loaded.");
     SkillXPNotify::Config::Load();
     SkillXPNotify::Hook::Install();
+    SkillXPNotify::CSFIntegration::Register();
 
     if (auto* msg = SKSE::GetMessagingInterface()) {
         msg->RegisterListener(OnSKSEMessage);
