@@ -157,6 +157,14 @@ throttle or debugging unexpected skill grants.
 
 See [CHANGELOG.md](CHANGELOG.md) for the per-version release notes.
 
+## Contributing
+
+The repo follows [Conventional Commits](https://www.conventionalcommits.org/)
+so GitHub's release-notes auto-generator and
+[`scripts/release-notes.sh`](scripts/release-notes.sh) can categorise
+changes automatically. See [CONTRIBUTING.md](CONTRIBUTING.md) for the
+exact format, recognised types/scopes, and the release-cutting steps.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

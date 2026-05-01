@@ -1,0 +1,66 @@
+# Configures GitHub's "Generate release notes" button. Effective only
+# when releases include PRs that carry these labels — for tag-pushed
+# commits without PRs, GitHub falls back to listing every commit
+# unchanged.
+#
+# Apply matching labels to PRs (Settings → Labels → create the labels
+# below if they don't exist). For pure commit-and-tag flow, use
+# scripts/release-notes.sh which parses Conventional Commits prefixes
+# locally.
+
+changelog:
+  exclude:
+    labels:
+      - skip-changelog
+      - dependencies-internal
+
+  categories:
+    - title: 💥 Breaking Changes
+      labels:
+        - breaking-change
+        - major
+
+    - title: ✨ Features
+      labels:
+        - feat
+        - feature
+        - enhancement
+
+    - title: 🐛 Bug Fixes
+      labels:
+        - fix
+        - bug
+        - bugfix
+
+    - title: ⚡ Performance
+      labels:
+        - perf
+        - performance
+
+    - title: 📝 Documentation
+      labels:
+        - docs
+        - documentation
+
+    - title: 🛠️ Build / Toolchain
+      labels:
+        - build
+        - toolchain
+        - ci
+
+    - title: ♻️ Refactoring
+      labels:
+        - refactor
+
+    - title: ✅ Tests
+      labels:
+        - test
+        - tests
+
+    - title: 🧹 Maintenance
+      labels:
+        - chore
+
+    - title: 🔀 Other Changes
+      labels:
+        - "*"
