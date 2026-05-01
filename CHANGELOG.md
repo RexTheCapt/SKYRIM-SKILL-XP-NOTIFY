@@ -81,6 +81,10 @@ Skyrim SE/AE 1.6.1170.
 - Requires SKSE 2.2.6+ and Address Library for SKSE Plugins v11
   (Nexus 32444).
 - VR is not supported.
+- **Custom Skills Framework (CSF) is not supported.** CSF custom skill
+  trees go through a separate Papyrus + SKSE pipeline and don't flow
+  through `RE::PlayerCharacter::AddSkillExperience`, so v1.x's hook
+  doesn't see them. Possible v2.0 feature if there's demand.
 - Plays cleanly with Skill Uncapper et al. — observes after the engine
   has applied the gain, so any rate multipliers are reflected in the
   displayed delta.

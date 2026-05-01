@@ -29,6 +29,15 @@ toward the next level.
 
 VR is **not** supported in v1.
 
+**Custom Skills Framework (CSF)** skill trees are also **not** supported.
+SkillXPNotify hooks the engine's `RE::PlayerCharacter::AddSkillExperience`
+function, which is specific to the 18 vanilla skills. CSF builds a
+parallel skill system in Papyrus + its own SKSE plugin; its XP grants
+don't flow through the same function and its skills aren't in
+`RE::ActorValueList`. Adding CSF support would need either a Papyrus
+shim mod (with an ESP, hard-depending on CSF) or a separate hook into
+CSF's own runtime — possibly a v2.0 feature if there's demand.
+
 ## Install
 
 1. Make sure SKSE 2.2.6+ and Address Library for SKSE Plugins are installed.
