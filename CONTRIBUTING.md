@@ -82,9 +82,14 @@ BREAKING CHANGE: build invocation changes — see new README section.
 4. Tag: `git tag -a vx.y.z -m "release vx.y.z"`.
 5. `git push origin main && git push origin vx.y.z`.
 6. Run `./scripts/package.sh` to produce `dist/SkillXPNotify-x.y.z.zip`.
-7. Create the GitHub release: `gh release create vx.y.z
-   dist/SkillXPNotify-x.y.z.zip --notes-file <(./scripts/release-notes.sh
-   v<prev>..vx.y.z)` — or use the web UI and paste the script output.
+7. Create the GitHub release on the web UI:
+   <https://github.com/RexTheCapt/SKYRIM-SKILL-XP-NOTIFY/releases/new>
+   - **Choose a tag:** pick `vx.y.z` from the dropdown.
+   - **Release title:** `vx.y.z` (or a one-line summary).
+   - **Describe this release:** paste the output of
+     `./scripts/release-notes.sh v<prev>..vx.y.z`.
+   - **Attach:** drag `dist/SkillXPNotify-x.y.z.zip` onto the assets area.
+   - Click *Publish release*.
 
 ## Building from source
 

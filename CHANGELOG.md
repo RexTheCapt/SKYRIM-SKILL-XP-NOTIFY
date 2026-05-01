@@ -16,9 +16,11 @@ release is also a git tag (e.g. `v1.1.0`) on the public repo.
   version — actual per-XP integration is gated on an upstream event
   that fires on every `Skill::Advance()` call (the existing
   `SkillIncreaseEvent` fires on rank-up only and would duplicate
-  CSF's own notification). If CSF isn't loaded, no code path touches
-  it; behaviour is identical to v1.1.0. No new runtime dependency,
-  no static link to CSF, no header vendoring.
+  CSF's own notification). Tracking that upstream addition at
+  [Exit-9B/CustomSkills#24](https://github.com/Exit-9B/CustomSkills/issues/24).
+  If CSF isn't loaded, no code path touches it; behaviour is identical
+  to v1.1.0. No new runtime dependency, no static link to CSF, no
+  header vendoring.
 
 ### Compatibility
 

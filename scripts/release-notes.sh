@@ -3,8 +3,8 @@
 #
 # Reads commits matching <range> (default = since the most recent
 # annotated v* tag) and groups them by Conventional Commits prefix.
-# Output is paste-ready for GitHub's release form or
-# `gh release create --notes-file -`.
+# Output is paste-ready for the GitHub Releases form's "Describe this
+# release" textbox.
 #
 # Usage:
 #   ./scripts/release-notes.sh                  # last v*..HEAD

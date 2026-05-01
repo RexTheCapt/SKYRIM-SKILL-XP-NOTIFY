@@ -79,8 +79,8 @@ namespace SkillXPNotify::CSFIntegration
                 "CSF detected (interface v{}). Per-XP integration is not "
                 "yet implemented — pending an upstream event that fires "
                 "on every Skill::Advance() call (the existing "
-                "SkillIncreaseEvent is rank-up-only). See "
-                "https://github.com/Exit-9B/CustomSkills",
+                "SkillIncreaseEvent is rank-up-only). Tracking at "
+                "https://github.com/Exit-9B/CustomSkills/issues/24",
                 g_csf->interface_version);
         }
     }  // namespace
