@@ -24,3 +24,13 @@ _deps/
 *.swp
 *.swo
 .DS_Store
+
+# Steam screenshots / captures land at repo root with these patterns
+# (e.g. 489830_68.jpg, "The Elder Scrolls V- Skyrim ... .mp4"). Curated
+# shots belong under docs/screenshots/ with meaningful names.
+/[0-9]*_[0-9]*.jpg
+/[0-9]*_[0-9]*.png
+/The Elder Scrolls*.mp4
+/The Elder Scrolls*.mkv
+*.mp4
+*.mkv

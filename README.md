@@ -1,6 +1,6 @@
 # SkillXPNotify
 
-![Sneak +3.6 -> 82% notification in the top-left corner](docs/screenshots/sneak-82-percent.jpg)
+![Vanilla "Sneak attack for 2.0X damage!" plus SkillXPNotify's "+2.9 Sneak -> 22%" rendering side-by-side during a bandit-cave encounter](docs/screenshots/sneak-attack-bandit.jpg)
 
 SKSE plugin for Skyrim Special Edition / Anniversary Edition that surfaces
 **per-action skill XP gains** in the corner notification area, so progress
