@@ -65,8 +65,10 @@ namespace SkillXPNotify::Notify
             return;
         }
 
-        // as a tofu glyph in Skyrim's default font. Start with ASCII "->".
-        // We can switch to "→" once the in-game test confirms it renders.
+        // The unicode rightwards-arrow (U+2192) may render as a tofu
+        // glyph in Skyrim's default font. Stick with ASCII "->" for
+        // portability; switch only after confirming the engine font
+        // covers U+2192 on the user's setup.
         std::string msg = std::format("+{:.1f} {} -> {:.0f}%",
                                       a_delta,
                                       DisplayName(a_skill, idx),

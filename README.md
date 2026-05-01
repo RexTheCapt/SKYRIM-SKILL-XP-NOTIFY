@@ -167,8 +167,39 @@ under the MIT license; their original LICENSE is preserved at
 
 ## Building from source
 
-Linux → Windows cross-compile (CMake + Ninja + vcpkg + clang-cl-20 +
-lld-link-20 + an xwin-fetched MSVC SDK) is documented in
-commit `530bbc73`) is locked in `.gitmodules`.
+Linux → Windows cross-compile via CMake + Ninja + vcpkg + clang-cl-20 +
+lld-link-20 against an `xwin`-fetched MSVC SDK. The CommonLibSSE-NG
+fork is pinned at submodule commit `530bbc73` (alandtse/CommonLibVR
+branch `ng`).
+
+```sh
+git submodule update --init --depth 1     # fetch lib/commonlibsse-ng
+
+# Toolchain prerequisites (apt + xwin + vcpkg) live under the project's
+# sibling toolchain dir; see INSTALL_LOG.md for exact versions and
+# reverse-uninstall commands.
+export VCPKG_ROOT=/path/to/vcpkg
+
+cmake -S . -B build -G Ninja \
+    -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
+    -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$PWD/cmake/clang-cl-xwin.cmake \
+    -DVCPKG_TARGET_TRIPLET=x64-windows-clang-cl-xwin \
+    -DVCPKG_OVERLAY_TRIPLETS=$PWD/cmake/triplets \
+    -DVCPKG_INSTALL_OPTIONS="--allow-unsupported" \
+    -DCMAKE_BUILD_TYPE=Release
+cmake --build build --target SkillXPNotify -j$(nproc)
+```
+
+Result: `build/SkillXPNotify.dll` — a ~970 KB `PE32+ executable for MS
+Windows 6.00 (DLL), x86-64`, statically linked against the MSVC CRT
+(no UCRT-forwarder dependency, so it loads cleanly under Wine/Proton
+prefixes that don't have those redists). Run `./scripts/package.sh`
+afterwards to produce the user-installable zip under `dist/`.
+
+The toolchain file at `cmake/clang-cl-xwin.cmake` carries inline
+comments explaining the clang-cl-on-Linux quirks (`/FI` of the right
+`sal.h`, `cmake/preinclude.h` for `using namespace std::literals`,
+Pascal-case lib symlinks under the xwin SDK, `/MT` static CRT to
+avoid the missing UCRT forwarders).
 
 Author: **RexTheCapt** &lt;6693554+RexTheCapt@users.noreply.github.com&gt;

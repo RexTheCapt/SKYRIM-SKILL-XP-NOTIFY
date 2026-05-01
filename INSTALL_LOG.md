@@ -73,6 +73,7 @@ Microsoft Windows SDK and MSVC CRT headers + import libraries, fetched + splatte
 
 ## 2026-04-29 — xmake 3.0.8
 
+xmake was tried briefly during M3 as the build system before the project pivoted to CMake + vcpkg. Installed portably under the toolchain dir as a standalone bundle (no system pollution); kept around in case future tooling needs it.
 
 - **Source:** GitHub release tarball — `https://github.com/xmake-io/xmake/releases/download/v3.0.8/xmake-bundle-v3.0.8.linux.x86_64`
 - **Install location:** `/home/user/storage/apps/skill-xp-notify-toolchain/xmake/bin/xmake` (single self-contained binary, ~2.6 MB).
@@ -91,6 +92,7 @@ Used by the CMake build (after the M3 pivot away from xmake) to fetch and build 
 - **Source:** `git clone --depth 1 https://github.com/microsoft/vcpkg.git` then `./bootstrap-vcpkg.sh -disableMetrics`.
 - **Install location:** `/home/user/storage/apps/skill-xp-notify-toolchain/vcpkg/`. The bootstrap also downloads vcpkg's own pinned cmake (4.2.3) and ninja into `vcpkg/downloads/tools/`.
 - **Approx size:** ~90 MB after bootstrap; grows to ~200–400 MB once ports (`spdlog`, `directxmath`, transitively `fmt`) build into `vcpkg/buildtrees/` and `vcpkg/installed/`.
+- **What gets installed per build:** see `vcpkg.json` in the project root. Currently pulls `spdlog` (with `wchar` feature) and `directxmath`. DirectXTK is **not** pulled — its vcpkg port runs `CompileShaders.cmd` (a Windows `.cmd` invoking `fxc.exe`) which won't run on Linux. We provide a stub `find_package(directxtk CONFIG REQUIRED)` config under `cmake/stub-directxtk/` plus a vendored copy of `SimpleMath.h`/`.inl` (the only DirectXTK header the lib actually uses; SimpleMath is fully inline so no .lib symbols are needed).
 - **Reverse:**
 
   ```
